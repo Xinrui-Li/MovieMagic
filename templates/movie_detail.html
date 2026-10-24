@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ movie.title if movie else "Movie Details" }} | Movie Magic</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="navbar">
+    <a href="/" class="logo">MOVIE<span>MAGIC</span></a>
+
+
+    <label class="theme-control">
+        <span class="theme-label">Theme</span>
+        <select class="theme-selector" aria-label="Choose color theme">
+            <option value="purple">Midnight Purple</option>
+            <option value="ocean">Ocean Blue</option>
+            <option value="forest">Forest Green</option>
+            <option value="rose">Rose Pink</option>
+        </select>
+    </label>
+
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('home') }}#movies">Discover Movies</a>
+        <a href="{{ url_for('home') }}#about">About</a>
+
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('watchlist') }}">My Watchlist</a>
+            <span class="nav-username">
+                Hi, {{ session.get('username') }}
+            </span>
+            <form method="POST"
+                  action="{{ url_for('logout') }}"
+                  class="nav-logout-form">
+                <button type="submit" class="nav-auth-button">
+                    Logout
+                </button>
+            </form>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register') }}" class="nav-register">
+                Register
+            </a>
+        {% endif %}
+    </nav>
+
+</header>
+
+<main class="detail-page">
+    {% if error %}
+        <section class="empty-state">
+            <h2>Unable to load movie</h2>
+            <p>{{ error }}</p>
+            <a href="{{ url_for('home') }}" class="reset-link">
+                Back to Home
+            </a>
+        </section>
+
+    {% elif movie %}
+        {% if movie.backdrop %}
+        <div class="detail-backdrop"
+             style="background-image: url('{{ movie.backdrop }}');">
+        </div>
+        {% endif %}
+
+        <section class="detail-content">
+            <div class="detail-poster-wrap">
+                {% if movie.poster %}
+                <img
+                    class="detail-poster"
+                    src="{{ movie.poster }}"
+                    alt="Poster for {{ movie.title }}"
+                >
+                {% else %}
+                <div class="detail-poster poster-placeholder">
+                    No poster available
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="detail-info">
+                <p class="eyebrow">MOVIE DETAILS</p>
+                <h1>{{ movie.title }}</h1>
+
+                {% if movie.tagline %}
+                <p class="detail-tagline">{{ movie.tagline }}</p>
+                {% endif %}
+
+                <div class="detail-stats">
+                    <span>★ {{ movie.rating }}/10</span>
+                    <span>{{ movie.release_date }}</span>
+                    <span>
+                        {% if movie.runtime %}
+                            {{ movie.runtime }} min
+                        {% else %}
+                            Runtime unavailable
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="genre-list">
+                    {% for genre in movie.genres %}
+                    <span class="genre-tag">{{ genre }}</span>
+                    {% endfor %}
+                </div>
+
+                <h2>Overview</h2>
+                <p class="detail-overview">{{ movie.overview }}</p>
+
+                <div class="detail-extra">
+                    <p>
+                        <strong>Status:</strong>
+                        {{ movie.status }}
+                    </p>
+                    <p>
+                        <strong>Original language:</strong>
+                        {{ movie.original_language|upper }}
+                    </p>
+                    <p>
+                        <strong>Number of ratings:</strong>
+                        {{ movie.vote_count }}
+                    </p>
+                </div>
+
+                <section class="trailer-section">
+                    <h2>Official Trailer</h2>
+
+                    {% if trailer_url %}
+                        <p>
+                            Watch the trailer for
+                            <strong>{{ movie.title }}</strong>.
+                        </p>
+
+                        <a
+                            href="{{ trailer_url }}"
+                            class="trailer-button"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span aria-hidden="true">▶</span>
+                            Watch Trailer on YouTube
+                        </a>
+                    {% else %}
+                        <p class="trailer-unavailable">
+                            No YouTube trailer is currently available for this movie.
+                        </p>
+                    {% endif %}
+                </section>
+
+
+                <a href="{{ url_for('home') }}" class="back-link">
+                    &larr; Back to Movies
+                </a>
+
+                {% if session.get('user_id') %}
+                    {% if is_in_watchlist %}
+                        <form
+                            method="POST"
+                            action="{{ url_for('remove_from_watchlist', movie_id=movie.id) }}"
+                            class="watchlist-form"
+                        >
+                            <button type="submit" class="trailer-button">
+                                Remove from Watchlist
+                            </button>
+                        </form>
+                    {% else %}
+                        <form
+                            method="POST"
+                            action="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
+                            class="watchlist-form"
+                        >
+                            <button type="submit" class="trailer-button">
+                                ♥ Add to Watchlist
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <p>
+                        <a href="{{ url_for('login') }}">Log in</a>
+                        or
+                        <a href="{{ url_for('register') }}">register</a>
+                        to add this movie to your watchlist.
+                    </p>
+                {% endif %}
+
+            </div>
+        </section>
+    {% endif %}
+</main>
+
+
+<section class="reviews-section" id="reviews">
+    <h2>Ratings &amp; Reviews</h2>
+
+    {% if session.get('user_id') %}
+        <div class="review-form-card">
+            <h3>
+                {% if user_review %}
+                    Edit Your Review
+                {% else %}
+                    Write a Review
+                {% endif %}
+            </h3>
+
+            <form
+                method="POST"
+                action="{{ url_for('save_review', movie_id=movie.id) }}"
+                class="review-form"
+            >
+                <label for="rating">Your Rating</label>
+
+                <select id="rating" name="rating" required>
+                    <option value="">Choose a rating</option>
+                    {% for star in range(5, 0, -1) %}
+                        <option
+                            value="{{ star }}"
+                            {% if user_review and user_review.rating == star %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ star }} / 5 stars
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="review_text">Your Review</label>
+
+                <textarea
+                    id="review_text"
+                    name="review_text"
+                    rows="5"
+                    maxlength="2000"
+                    placeholder="What did you think of this movie?"
+                    required
+                >{{ user_review.review_text if user_review else '' }}</textarea>
+
+                <button type="submit" class="review-submit-button">
+                    {% if user_review %}
+                        Update Review
+                    {% else %}
+                        Submit Review
+                    {% endif %}
+                </button>
+            </form>
+
+            {% if user_review %}
+                <form
+                    method="POST"
+                    action="{{ url_for('delete_review', movie_id=movie.id) }}"
+                    class="delete-review-form"
+                    onsubmit="return confirm('Delete your review?');"
+                >
+                    <button type="submit" class="review-delete-button">
+                        Delete My Review
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="review-login-prompt">
+            <a href="{{ url_for('login') }}">Log in</a>
+            to rate this movie and write a review.
+        </p>
+    {% endif %}
+
+    <div class="reviews-list">
+        <h3>Community Reviews ({{ reviews|length }})</h3>
+
+        {% if reviews %}
+            {% for review in reviews %}
+                <article class="review-card">
+                    <div class="review-card-header">
+                        <strong>{{ review.username }}</strong>
+
+                        <span class="review-rating">
+                            {% for star in range(1, 6) %}
+                                {% if star <= review.rating %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            {% endfor %}
+                            ({{ review.rating }}/5)
+                        </span>
+                    </div>
+
+                    <p class="review-text">{{ review.review_text }}</p>
+
+                    <p class="review-date">
+                        {% if review.created_at == review.updated_at %}
+                            Posted: {{ review.created_at }}
+                        {% else %}
+                            Updated: {{ review.updated_at }}
+                        {% endif %}
+                    </p>
+                </article>
+            {% endfor %}
+        {% else %}
+            <p class="no-reviews">
+                No reviews yet. Be the first to share your thoughts!
+            </p>
+        {% endif %}
+    </div>
+</section>
+
+
+<footer>
+    <a href="/" class="logo">MOVIE<span>MAGIC</span></a>
+    <p>Discover stories. Find your next favorite.</p>
+    <p class="footer-note">
+        Movie data provided by TMDB.
+        This product uses the TMDB API but is not endorsed or certified by TMDB.
+    </p>
+</footer>
+
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+
+</body>
+</html>
