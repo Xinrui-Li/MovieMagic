@@ -104,6 +104,17 @@
                 {% endfor %}
             </select>
 
+            <input
+                type="number"
+                name="year"
+                inputmode="numeric"
+                min="{{ min_year }}"
+                max="{{ max_year }}"
+                placeholder="Any year"
+                value="{{ year }}"
+                aria-label="Filter by {{ 'first air year' if media == 'tv' else 'release year' }}"
+            >
+
             <select name="sort_by" aria-label="Sort results">
                 <option value="popularity.desc"
                     {% if sort_by == "popularity.desc" %}selected{% endif %}>
@@ -183,8 +194,12 @@
                     {% set label = "TV Shows" if media == "tv" else "Movies" %}
                     {% if query %}
                         Search Results for "{{ query }}"
+                        {% if year %}({{ year }}){% endif %}
                     {% elif genre %}
                         {{ genres.get(genre|int, "Filtered") }} {{ label }}
+                        {% if year %}from {{ year }}{% endif %}
+                    {% elif year %}
+                        {{ label }} from {{ year }}
                     {% elif media == "tv" %}
                         Popular TV Shows
                     {% else %}
@@ -265,6 +280,7 @@
                     page=page - 1,
                     query=query,
                     genre=genre,
+                    year=year,
                     sort_by=sort_by,
                     media=media
                 ) }}#movies"
@@ -289,6 +305,7 @@
                     page=page + 1,
                     query=query,
                     genre=genre,
+                    year=year,
                     sort_by=sort_by,
                     media=media
                 ) }}#movies"
@@ -307,7 +324,7 @@
         <div class="empty-state">
             <h3>No movies found</h3>
             <p>
-                Try another title or choose a different genre.
+                Try another title, genre, or year.
             </p>
             <a href="{{ url_for('home') }}" class="reset-link">
                 Browse all movies

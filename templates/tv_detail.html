@@ -146,6 +146,52 @@
                     </p>
                 </div>
 
+                {% if cast %}
+                <section class="credits-section">
+                    <h2>Top Cast</h2>
+
+                    <div class="cast-scroller">
+                        {% for person in cast %}
+                        <div class="cast-card">
+                            {% if person.photo %}
+                            <img
+                                class="cast-photo"
+                                src="{{ person.photo }}"
+                                alt="Photo of {{ person.name }}"
+                                loading="lazy"
+                            >
+                            {% else %}
+                            <div class="cast-photo cast-photo-placeholder"
+                                 aria-hidden="true">
+                                {{ person.name[0] }}
+                            </div>
+                            {% endif %}
+
+                            <p class="cast-name">{{ person.name }}</p>
+                            {% if person.character %}
+                            <p class="cast-character">{{ person.character }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if crew %}
+                <section class="credits-section">
+                    <h2>Key Crew</h2>
+
+                    <ul class="crew-list">
+                        {% for person in crew %}
+                        <li>
+                            <strong>{{ person.name }}</strong>
+                            <span>{{ person.jobs|join(", ") }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
+
                 <section class="trailer-section">
                     <h2>Official Trailer</h2>
 
