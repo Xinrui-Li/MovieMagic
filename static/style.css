@@ -1518,3 +1518,119 @@ nav a:hover {
     display: block;
     margin-top: 10px;
 }
+/* Movies / TV search toggle */
+
+.search-form {
+    max-width: 760px;
+}
+
+.search-form select[name="media"] {
+    min-width: 110px;
+}
+
+@media (max-width: 600px) {
+    .search-form {
+        flex-wrap: wrap;
+    }
+
+    .search-form input {
+        flex-basis: 100%;
+    }
+}
+
+/* Trending, popular, and upcoming rows on the home page */
+
+.home-rows {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 28px 0;
+}
+
+.home-row {
+    margin-bottom: 44px;
+}
+
+.home-row .section-heading {
+    margin-bottom: 18px;
+}
+
+.row-scroller {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 170px;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    scrollbar-color: var(--border) transparent;
+}
+
+.row-card {
+    min-width: 0;
+    color: var(--text);
+    text-decoration: none;
+    scroll-snap-align: start;
+}
+
+.row-poster-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 2 / 3;
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: transform 0.25s, border-color 0.25s;
+}
+
+.row-card:hover .row-poster-wrap {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+}
+
+.row-card h3 {
+    margin: 10px 0 2px;
+    overflow: hidden;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.row-card .movie-meta {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.row-card .rating {
+    top: 8px;
+    right: 8px;
+    padding: 3px 7px;
+    font-size: 0.75rem;
+}
+
+.media-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 8px;
+    color: #17121f;
+    background: var(--accent);
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.row-card .media-badge {
+    top: 8px;
+    left: 8px;
+}
+
+@media (max-width: 760px) {
+    .home-rows {
+        padding: 30px 18px 0;
+    }
+
+    .row-scroller {
+        grid-auto-columns: 140px;
+    }
+}
