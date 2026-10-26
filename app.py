@@ -514,7 +514,8 @@ def home():
         except ValueError:
             page = 1
 
-    page = max(1, page)
+    # TMDb only serves result pages 1 to 500.
+    page = min(max(1, page), 500)
 
     if sort_by not in ALLOWED_SORTS:
         sort_by = "popularity.desc"
@@ -606,7 +607,7 @@ def home():
                 media,
             )
 
-        total_pages = max(1, total_pages)
+        total_pages = min(max(1, total_pages), 500)
         page = min(page, total_pages)
 
     except requests.RequestException:
@@ -928,15 +929,17 @@ def watchlist():
         movies=movies,
     )
 
-@app.route(
-    "/watchlist/<int:movie_id>/status",
-    methods=["POST"],
-    defaults={"media_type": "movie"},
-)
+# The movie route is listed last so Flask registers it first and uses it
+# as the default when url_for() is called without media_type.
 @app.route(
     "/watchlist/tv/<int:movie_id>/status",
     methods=["POST"],
     defaults={"media_type": "tv"},
+)
+@app.route(
+    "/watchlist/<int:movie_id>/status",
+    methods=["POST"],
+    defaults={"media_type": "movie"},
 )
 @login_required
 def update_watch_status(movie_id, media_type):
@@ -972,15 +975,17 @@ def update_watch_status(movie_id, media_type):
 
 
 
-@app.route(
-    "/watchlist/add/<int:movie_id>",
-    methods=["POST"],
-    defaults={"media_type": "movie"},
-)
+# The movie route is listed last so Flask registers it first and uses it
+# as the default when url_for() is called without media_type.
 @app.route(
     "/watchlist/add/tv/<int:movie_id>",
     methods=["POST"],
     defaults={"media_type": "tv"},
+)
+@app.route(
+    "/watchlist/add/<int:movie_id>",
+    methods=["POST"],
+    defaults={"media_type": "movie"},
 )
 @login_required
 def add_to_watchlist(movie_id, media_type):
@@ -1041,15 +1046,17 @@ def add_to_watchlist(movie_id, media_type):
     return redirect(detail_url(media_type, movie_id))
 
 
-@app.route(
-    "/watchlist/remove/<int:movie_id>",
-    methods=["POST"],
-    defaults={"media_type": "movie"},
-)
+# The movie route is listed last so Flask registers it first and uses it
+# as the default when url_for() is called without media_type.
 @app.route(
     "/watchlist/remove/tv/<int:movie_id>",
     methods=["POST"],
     defaults={"media_type": "tv"},
+)
+@app.route(
+    "/watchlist/remove/<int:movie_id>",
+    methods=["POST"],
+    defaults={"media_type": "movie"},
 )
 @login_required
 def remove_from_watchlist(movie_id, media_type):
@@ -1147,15 +1154,17 @@ def profile():
     )
 
 
-@app.route(
-    "/movie/<int:movie_id>/review",
-    methods=["POST"],
-    defaults={"media_type": "movie"},
-)
+# The movie route is listed last so Flask registers it first and uses it
+# as the default when url_for() is called without media_type.
 @app.route(
     "/tv/<int:movie_id>/review",
     methods=["POST"],
     defaults={"media_type": "tv"},
+)
+@app.route(
+    "/movie/<int:movie_id>/review",
+    methods=["POST"],
+    defaults={"media_type": "movie"},
 )
 @login_required
 def save_review(movie_id, media_type):
@@ -1210,15 +1219,17 @@ def save_review(movie_id, media_type):
     return redirect(detail_url(media_type, movie_id))
 
 
-@app.route(
-    "/movie/<int:movie_id>/review/delete",
-    methods=["POST"],
-    defaults={"media_type": "movie"},
-)
+# The movie route is listed last so Flask registers it first and uses it
+# as the default when url_for() is called without media_type.
 @app.route(
     "/tv/<int:movie_id>/review/delete",
     methods=["POST"],
     defaults={"media_type": "tv"},
+)
+@app.route(
+    "/movie/<int:movie_id>/review/delete",
+    methods=["POST"],
+    defaults={"media_type": "movie"},
 )
 @login_required
 def delete_review(movie_id, media_type):
@@ -1309,4 +1320,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Set FLASK_DEBUG=1 in .env to turn on debug mode while developing.
+    app.run(debug=os.getenv("FLASK_DEBUG") == "1")

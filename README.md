@@ -7,6 +7,8 @@ MovieMagic is a movie discovery and tracking web application that helps users ex
 - **Movie Discovery:** Search for movies and browse movie information, posters, and trailers using TMDb data.
 - **Filtering and Sorting:** Explore movies using available filters and sorting options.
 - **Movie Details:** View movie descriptions, metadata, and available trailers.
+- **TV Shows:** Search TV shows, open TV show pages, and save or review them like movies.
+- **Trending Rows:** Browse Trending, Popular Movies, Popular TV Shows, and Coming Soon on the home page.
 - **Cast & Crew:** See the top-billed cast and key crew on every movie and TV show page.
 - **Year Filter:** Narrow searches and browsing to a release year (movies) or first air year (TV shows).
 - **User Accounts:** Register, log in, and manage a personal account.
@@ -32,6 +34,7 @@ MovieMagic/
 ├── static/             # CSS, JavaScript, and static assets
 ├── .env                # Local environment configuration
 ├── .gitignore          # Files excluded from Git
+├── requirements.txt    # Python packages
 └── movies.db           # Local SQLite database, if generated
 ```
 
@@ -46,6 +49,13 @@ cd MovieMagic
 
 ### 2. Create and activate a virtual environment
 
+On macOS / Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 On Windows PowerShell:
 
 ```powershell
@@ -55,21 +65,34 @@ python -m venv .venv
 
 ### 3. Install dependencies
 
-Install the Python packages required by the application. If a `requirements.txt` file is available, run:
-
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
-Otherwise, install the packages imported by `app.py`.
+### 4. Create a `.env` file
 
-### 4. Run the application
+Create a file named `.env` in the project folder:
 
-```powershell
-python app.py
+```text
+SECRET_KEY=any-long-random-string
+TMDB_API_KEY=your-tmdb-api-read-access-token
 ```
 
-Open the local URL displayed in the terminal, commonly `http://127.0.0.1:5000`, in your browser.
+- `TMDB_API_KEY` must be the long **API Read Access Token** from
+  themoviedb.org → Settings → API (it starts with `eyJ`), not the short API key.
+- Generate a `SECRET_KEY` with `python -c "import secrets; print(secrets.token_hex(32))"`.
+- Optional: add `FLASK_DEBUG=1` to turn on debug mode while developing.
+- Never commit `.env` to GitHub.
+
+### 5. Run the application
+
+```bash
+flask --app app run --port 5001
+```
+
+Open http://127.0.0.1:5001 in your browser.
+
+Port 5001 is used because macOS AirPlay often takes port 5000.
 
 ## Usage
 

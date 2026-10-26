@@ -9,36 +9,8 @@
           href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header class="navbar">
-        <a href="{{ url_for('home') }}" class="logo">
-            Movie <span>Magic</span>
-        </a>
-
-        <nav>
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('watchlist') }}">My Watchlist</a>
-            <a href="{{ url_for('profile') }}">My Profile</a>
-
-            <label class="theme-control">
-                <span class="theme-label">Theme</span>
-                <select class="theme-selector"
-                        aria-label="Choose color theme">
-                    <option value="purple">Midnight Purple</option>
-                    <option value="ocean">Ocean Blue</option>
-                    <option value="forest">Forest Green</option>
-                    <option value="rose">Rose Pink</option>
-                </select>
-            </label>
-
-            <form method="POST"
-                  action="{{ url_for('logout') }}"
-                  class="nav-logout-form">
-                <button type="submit" class="nav-auth-button">
-                    Logout
-                </button>
-            </form>
-        </nav>
-    </header>
+{% include "_navbar.html" %}
+{% include "_flash.html" %}
 
     <main class="profile-page">
         <section class="profile-header">
