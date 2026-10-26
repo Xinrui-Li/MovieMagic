@@ -18,6 +18,7 @@
     <nav class="main-nav">
         <a href="{{ url_for('home') }}">Home</a>
         <a href="{{ url_for('home') }}#movies">Discover Movies</a>
+        <a href="{{ url_for('home', media='tv') }}#movies">TV Shows</a>
 
         {% if session.get('user_id') %}
             <a href="{{ url_for('watchlist') }}">My Watchlist</a>
@@ -63,17 +64,32 @@
         <p class="eyebrow">YOUR NEXT MOVIE NIGHT STARTS HERE</p>
         <h1>Find Your Next<br><span>Favorite Movie.</span></h1>
         <p class="hero-text">
-            Explore movies, discover hidden gems, and find your next
-            unforgettable story.
+            Explore movies and TV shows, discover hidden gems, and find
+            your next unforgettable story.
         </p>
 
         <form class="search-form" method="POST" action="/">
+            <select
+                name="media"
+                aria-label="Search movies or TV shows"
+                onchange="this.form.submit()"
+            >
+                <option value="movie"
+                    {% if media == "movie" %}selected{% endif %}>
+                    Movies
+                </option>
+                <option value="tv"
+                    {% if media == "tv" %}selected{% endif %}>
+                    TV Shows
+                </option>
+            </select>
+
             <input
                 type="text"
                 name="query"
-                placeholder="Search movie titles..."
+                placeholder="Search {{ 'TV show' if media == 'tv' else 'movie' }} titles..."
                 value="{{ query }}"
-                aria-label="Search movie titles"
+                aria-label="Search titles"
             >
 
             <select name="genre" aria-label="Filter by genre">
@@ -88,7 +104,7 @@
                 {% endfor %}
             </select>
 
-            <select name="sort_by" aria-label="Sort movies">
+            <select name="sort_by" aria-label="Sort results">
                 <option value="popularity.desc"
                     {% if sort_by == "popularity.desc" %}selected{% endif %}>
                     Popularity
@@ -107,15 +123,70 @@
         </form>
     </section>
 
+    {% if home_rows %}
+    <section class="home-rows" id="trending">
+        {% for row in home_rows %}
+        <div class="home-row">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">{{ row.eyebrow }}</p>
+                    <h2>{{ row.heading }}</h2>
+                </div>
+            </div>
+
+            <div class="row-scroller">
+                {% for movie in row.movies %}
+                <a class="row-card"
+                   href="{{ detail_url(movie.media_type, movie.id) }}">
+                    <div class="row-poster-wrap">
+                        {% if movie.poster %}
+                        <img
+                            src="{{ movie.poster }}"
+                            alt="Poster for {{ movie.title }}"
+                            class="poster"
+                            loading="lazy"
+                        >
+                        {% else %}
+                        <div class="poster poster-placeholder">
+                            No poster available
+                        </div>
+                        {% endif %}
+
+                        <span class="rating">★ {{ movie.rating }}</span>
+
+                        {% if movie.media_type == "tv" %}
+                        <span class="media-badge">TV</span>
+                        {% endif %}
+                    </div>
+
+                    <h3>{{ movie.title }}</h3>
+                    <p class="movie-meta">
+                        {% if row.heading == "Coming Soon" %}
+                            {{ movie.release_date or "Date TBA" }}
+                        {% else %}
+                            {{ movie.year }}
+                        {% endif %}
+                    </p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
     <section class="movie-section" id="movies">
         <div class="section-heading">
             <div>
                 <p class="eyebrow">EXPLORE THE COLLECTION</p>
                 <h2>
+                    {% set label = "TV Shows" if media == "tv" else "Movies" %}
                     {% if query %}
                         Search Results for "{{ query }}"
                     {% elif genre %}
-                        {{ genres.get(genre|int, "Filtered") }} Movies
+                        {{ genres.get(genre|int, "Filtered") }} {{ label }}
+                    {% elif media == "tv" %}
+                        Popular TV Shows
                     {% else %}
                         Popular Picks
                     {% endif %}
@@ -123,7 +194,7 @@
             </div>
 
             <span class="movie-count">
-                {{ total_results }} movies
+                {{ total_results }} {{ "shows" if media == "tv" else "movies" }}
             </span>
         </div>
 
@@ -142,7 +213,7 @@
             <article class="movie-card">
                 <div class="poster-wrap">
                     {% if movie.poster %}
-                    <a href="{{ url_for('movie_detail', movie_id=movie.id) }}">
+                    <a href="{{ detail_url(movie.media_type, movie.id) }}">
                         <img
                             src="{{ movie.poster }}"
                             alt="Poster for {{ movie.title }}"
@@ -157,12 +228,16 @@
                     {% endif %}
 
                     <span class="rating">★ {{ movie.rating }}</span>
+
+                    {% if movie.media_type == "tv" %}
+                    <span class="media-badge">TV</span>
+                    {% endif %}
                 </div>
 
                 <div class="movie-info">
                     <h3>
                         <a class="movie-title-link"
-                           href="{{ url_for('movie_detail', movie_id=movie.id) }}">
+                           href="{{ detail_url(movie.media_type, movie.id) }}">
                             {{ movie.title }}
                         </a>
                     </h3>
@@ -190,7 +265,8 @@
                     page=page - 1,
                     query=query,
                     genre=genre,
-                    sort_by=sort_by
+                    sort_by=sort_by,
+                    media=media
                 ) }}#movies"
             >
                 &laquo; Previous
@@ -213,7 +289,8 @@
                     page=page + 1,
                     query=query,
                     genre=genre,
-                    sort_by=sort_by
+                    sort_by=sort_by,
+                    media=media
                 ) }}#movies"
             >
                 Next &raquo;

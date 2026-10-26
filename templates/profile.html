@@ -107,9 +107,9 @@
                         <article class="profile-review-card">
                             <div class="profile-review-top">
                                 <h3>
-                                    <a href="{{ url_for(
-                                        'movie_detail',
-                                        movie_id=review.movie_id
+                                    <a href="{{ detail_url(
+                                        review.media_type,
+                                        review.movie_id
                                     ) }}">
                                         {{ review.movie_title }}
                                     </a>
@@ -131,11 +131,11 @@
                             </p>
 
                             <a class="profile-movie-link"
-                               href="{{ url_for(
-                                   'movie_detail',
-                                   movie_id=review.movie_id
+                               href="{{ detail_url(
+                                   review.media_type,
+                                   review.movie_id
                                ) }}">
-                                View Movie →
+                                View {{ "Show" if review.media_type == "tv" else "Movie" }} →
                             </a>
                         </article>
                     {% endfor %}

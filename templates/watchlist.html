@@ -49,7 +49,7 @@
 
         <article class="movie-card">
 
-            <a href="{{ url_for('movie_detail', movie_id=movie.movie_id) }}">
+            <a href="{{ detail_url(movie.media_type, movie.movie_id) }}">
                 {% if movie.poster %}
                 <img
                     src="{{ movie.poster }}"
@@ -69,7 +69,7 @@
                 <h3>
                     <a
                         class="movie-title-link"
-                        href="{{ url_for('movie_detail', movie_id=movie.movie_id) }}"
+                        href="{{ detail_url(movie.media_type, movie.movie_id) }}"
                     >
                         {{ movie.title }}
                     </a>
@@ -86,7 +86,7 @@
                      style="display: block; visibility: visible; opacity: 1; width: 100%; box-sizing: border-box; margin: 16px 0; padding: 12px; border: 2px solid red; background: #fff8cc; color: #222;">
 
                     <label
-                        for="status-{{ movie.movie_id }}"
+                        for="status-{{ movie.media_type }}-{{ movie.movie_id }}"
                         style="display: block; color: #222; margin-bottom: 8px;"
                     >
                         Watch Status
@@ -94,13 +94,13 @@
 
                     <form
                         method="POST"
-                        action="{{ url_for('update_watch_status', movie_id=movie.movie_id) }}"
+                        action="{{ url_for('update_watch_status', movie_id=movie.movie_id, media_type=movie.media_type) }}"
                         class="watch-status-form"
                         style="display: flex; flex-direction: column; gap: 8px;"
                     >
 
                         <select
-                            id="status-{{ movie.movie_id }}"
+                            id="status-{{ movie.media_type }}-{{ movie.movie_id }}"
                             name="watch_status"
                             class="watch-status-select"
                             style="display: block; visibility: visible; opacity: 1; width: 100%; min-height: 44px; padding: 10px; box-sizing: border-box; background: white; color: black; border: 2px solid red;"
@@ -141,7 +141,7 @@
                 <!-- Remove from watchlist -->
                 <form
                     method="POST"
-                    action="{{ url_for('remove_from_watchlist', movie_id=movie.movie_id) }}"
+                    action="{{ url_for('remove_from_watchlist', movie_id=movie.movie_id, media_type=movie.media_type) }}"
                 >
                     <button type="submit" class="remove-button">
                         Remove from Watchlist
@@ -159,7 +159,7 @@
 
     <div class="empty-state">
         <h2>Your watchlist is empty</h2>
-        <p>Explore movies and save the ones you want to watch.</p>
+        <p>Explore movies and TV shows and save the ones you want to watch.</p>
 
         <a href="{{ url_for('home') }}" class="reset-link">
             Discover Movies
