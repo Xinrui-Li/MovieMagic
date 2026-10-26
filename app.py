@@ -2,6 +2,7 @@
 import os
 import time
 import requests
+from datetime import date
 
 from dotenv import load_dotenv
 
@@ -228,6 +229,13 @@ TV_SORTS = {
 
 MEDIA_TYPES = {"movie", "tv"}
 
+# Year filter. Movies and TV shows use different TMDb parameter names.
+MIN_YEAR = 1874
+YEAR_PARAMS = {
+    "movie": "primary_release_year",
+    "tv": "first_air_date_year",
+}
+
 # Rows shown on the home page: (heading, eyebrow, endpoint, media type).
 # /trending/all mixes movies and TV shows, so each result says its type.
 HOME_ROWS = [
@@ -392,6 +400,82 @@ def pick_trailer(videos):
     return None
 
 
+PROFILE_BASE_URL = "https://image.tmdb.org/t/p/w185"
+CAST_LIMIT = 12
+CREW_LIMIT = 10
+
+# Crew jobs shown on detail pages, in display order.
+KEY_CREW_JOBS = [
+    "Director",
+    "Screenplay",
+    "Writer",
+    "Story",
+    "Novel",
+    "Original Music Composer",
+    "Director of Photography",
+    "Editor",
+    "Producer",
+]
+
+# TV episodes each have their own director, so TMDb's show-level crew
+# is led by the executive producers (usually the showrunners).
+TV_KEY_CREW_JOBS = [
+    "Executive Producer",
+    "Novel",
+    "Original Music Composer",
+    "Director of Photography",
+    "Editor",
+    "Producer",
+]
+
+
+def format_credits(credits, key_jobs=KEY_CREW_JOBS):
+    """Return the top-billed cast and key crew from TMDb credits."""
+    cast_rows = sorted(
+        credits.get("cast", []),
+        key=lambda person: person.get("order", 999),
+    )
+
+    cast = []
+    for person in cast_rows[:CAST_LIMIT]:
+        profile_path = person.get("profile_path")
+        cast.append({
+            "name": person.get("name", "Unknown"),
+            "character": person.get("character") or "",
+            "photo": (
+                f"{PROFILE_BASE_URL}{profile_path}"
+                if profile_path else None
+            ),
+        })
+
+    # One entry per person, listing every key job they had.
+    crew_by_person = {}
+    for person in credits.get("crew", []):
+        job = person.get("job")
+        name = person.get("name")
+
+        if job not in key_jobs or not name:
+            continue
+
+        member = crew_by_person.setdefault(
+            person.get("id"), {"name": name, "jobs": []}
+        )
+        if job not in member["jobs"]:
+            member["jobs"].append(job)
+
+    for member in crew_by_person.values():
+        member["jobs"].sort(key=key_jobs.index)
+
+    # Directors first, then writers, and so on. Producers go last
+    # because big films list many of them.
+    crew = sorted(
+        crew_by_person.values(),
+        key=lambda member: key_jobs.index(member["jobs"][0]),
+    )
+
+    return cast, crew[:CREW_LIMIT]
+
+
 def detail_url(media_type, movie_id):
     """Link to the right detail page for a movie or TV show."""
     if media_type == "tv":
@@ -414,6 +498,7 @@ def home():
             "sort_by", "popularity.desc"
         )
         genre = request.form.get("genre", "")
+        year = request.form.get("year", "").strip()
         media = request.form.get("media", "movie")
         page = 1
     else:
@@ -422,6 +507,7 @@ def home():
             "sort_by", "popularity.desc"
         )
         genre = request.args.get("genre", "")
+        year = request.args.get("year", "").strip()
         media = request.args.get("media", "movie")
         try:
             page = int(request.args.get("page", 1))
@@ -445,6 +531,12 @@ def home():
     ):
         genre = ""
 
+    # Only allow a four-digit year in a sensible range.
+    # Upcoming titles can be listed a few years ahead.
+    max_year = date.today().year + 5
+    if not (year.isdigit() and MIN_YEAR <= int(year) <= max_year):
+        year = ""
+
     error = None
     movies = []
     total_pages = 1
@@ -454,14 +546,20 @@ def home():
         if query:
             # Search by title. TMDb search does not support
             # the same global genre/sort options as Discover.
+            params = {
+                "query": query,
+                "include_adult": "false",
+                "language": "en-US",
+                "page": page,
+            }
+
+            # Unlike genre, search supports the year filter on TMDb's side.
+            if year:
+                params[YEAR_PARAMS[media]] = year
+
             movies, total_pages, total_results = fetch_movies(
                 f"/search/{media}",
-                {
-                    "query": query,
-                    "include_adult": "false",
-                    "language": "en-US",
-                    "page": page,
-                },
+                params,
                 media,
             )
 
@@ -499,6 +597,9 @@ def home():
             if genre:
                 params["with_genres"] = genre
 
+            if year:
+                params[YEAR_PARAMS[media]] = year
+
             movies, total_pages, total_results = fetch_movies(
                 f"/discover/{media}",
                 params,
@@ -532,7 +633,10 @@ def home():
 
     # Show trending/popular/upcoming rows only on the plain home page.
     home_rows = []
-    if not query and not genre and page == 1 and media == "movie":
+    if (
+        not query and not genre and not year
+        and page == 1 and media == "movie"
+    ):
         home_rows = fetch_home_rows()
 
     return render_template(
@@ -542,6 +646,9 @@ def home():
         sort_by=sort_by,
         genre=genre,
         genres=genre_map,
+        year=year,
+        min_year=MIN_YEAR,
+        max_year=max_year,
         media=media,
         home_rows=home_rows,
         error=error,
@@ -560,46 +667,21 @@ def movie_detail(movie_id):
     movie = None
     trailer_url = None
     is_in_watchlist = False
+    cast = []
+    crew = []
 
     try:
+        # append_to_response gets videos and credits in the same request.
         data = fetch_data(
             f"/movie/{movie_id}",
-            {"language": "en-US"},
+            {"language": "en-US", "append_to_response": "videos,credits"},
         )
 
-        # Fetch videos associated with this movie.
-        video_data = fetch_data(
-            f"/movie/{movie_id}/videos",
-            {"language": "en-US"},
+        trailer_url = pick_trailer(
+            data.get("videos", {}).get("results", [])
         )
 
-        videos = video_data.get("results", [])
-
-        # Prefer an official YouTube trailer.
-        trailers = [
-            video for video in videos
-            if video.get("site") == "YouTube"
-            and video.get("type") == "Trailer"
-            and video.get("key")
-        ]
-
-        official_trailers = [
-            video for video in trailers
-            if video.get("official") is True
-        ]
-
-        selected_trailer = (
-            official_trailers[0]
-            if official_trailers
-            else trailers[0] if trailers
-            else None
-        )
-
-        if selected_trailer:
-            trailer_url = (
-                "https://www.youtube.com/watch?v="
-                + selected_trailer["key"]
-            )
+        cast, crew = format_credits(data.get("credits", {}))
 
         poster_path = data.get("poster_path")
         backdrop_path = data.get("backdrop_path")
@@ -669,6 +751,8 @@ def movie_detail(movie_id):
         movie=movie,
         error=error,
         trailer_url=trailer_url,
+        cast=cast,
+        crew=crew,
         is_in_watchlist=is_in_watchlist,
         reviews=reviews,
         user_review=user_review,
@@ -711,16 +795,22 @@ def tv_detail(tv_id):
     show = None
     trailer_url = None
     is_in_watchlist = False
+    cast = []
+    crew = []
 
     try:
-        # append_to_response gets the videos in the same request.
+        # append_to_response gets videos and credits in the same request.
         data = fetch_data(
             f"/tv/{tv_id}",
-            {"language": "en-US", "append_to_response": "videos"},
+            {"language": "en-US", "append_to_response": "videos,credits"},
         )
 
         trailer_url = pick_trailer(
             data.get("videos", {}).get("results", [])
+        )
+
+        cast, crew = format_credits(
+            data.get("credits", {}), TV_KEY_CREW_JOBS
         )
 
         poster_path = data.get("poster_path")
@@ -802,6 +892,8 @@ def tv_detail(tv_id):
         show=show,
         error=error,
         trailer_url=trailer_url,
+        cast=cast,
+        crew=crew,
         is_in_watchlist=is_in_watchlist,
         reviews=reviews,
         user_review=user_review,
