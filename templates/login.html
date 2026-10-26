@@ -11,23 +11,8 @@
 
 <body>
 
-<label class="theme-control">
-    <span class="theme-label">Theme</span>
-    <select class="theme-selector" aria-label="Choose color theme">
-        <option value="purple">Midnight Purple</option>
-        <option value="ocean">Ocean Blue</option>
-        <option value="forest">Forest Green</option>
-        <option value="rose">Rose Pink</option>
-    </select>
-</label>
 
-<header class="navbar">
-    <a href="/" class="logo">MOVIE<span>MAGIC</span></a>
-    <nav>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('register') }}">Register</a>
-    </nav>
-</header>
+{% include "_navbar.html" %}
 
 <main class="auth-page">
     <h1>Welcome Back</h1>

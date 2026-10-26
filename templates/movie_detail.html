@@ -11,46 +11,8 @@
 
 <body>
 
-<header class="navbar">
-    <a href="/" class="logo">MOVIE<span>MAGIC</span></a>
-
-
-    <label class="theme-control">
-        <span class="theme-label">Theme</span>
-        <select class="theme-selector" aria-label="Choose color theme">
-            <option value="purple">Midnight Purple</option>
-            <option value="ocean">Ocean Blue</option>
-            <option value="forest">Forest Green</option>
-            <option value="rose">Rose Pink</option>
-        </select>
-    </label>
-
-    <nav>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('home') }}#movies">Discover Movies</a>
-        <a href="{{ url_for('home') }}#about">About</a>
-
-        {% if session.get('user_id') %}
-            <a href="{{ url_for('watchlist') }}">My Watchlist</a>
-            <span class="nav-username">
-                Hi, {{ session.get('username') }}
-            </span>
-            <form method="POST"
-                  action="{{ url_for('logout') }}"
-                  class="nav-logout-form">
-                <button type="submit" class="nav-auth-button">
-                    Logout
-                </button>
-            </form>
-        {% else %}
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('register') }}" class="nav-register">
-                Register
-            </a>
-        {% endif %}
-    </nav>
-
-</header>
+{% include "_navbar.html" %}
+{% include "_flash.html" %}
 
 <main class="detail-page">
     {% if error %}
@@ -208,7 +170,7 @@
                     {% if is_in_watchlist %}
                         <form
                             method="POST"
-                            action="{{ url_for('remove_from_watchlist', movie_id=movie.id) }}"
+                            action="{{ url_for('remove_from_watchlist', movie_id=movie.id, media_type='movie') }}"
                             class="watchlist-form"
                         >
                             <button type="submit" class="trailer-button">
@@ -218,7 +180,7 @@
                     {% else %}
                         <form
                             method="POST"
-                            action="{{ url_for('add_to_watchlist', movie_id=movie.id) }}"
+                            action="{{ url_for('add_to_watchlist', movie_id=movie.id, media_type='movie') }}"
                             class="watchlist-form"
                         >
                             <button type="submit" class="trailer-button">
@@ -241,6 +203,7 @@
 </main>
 
 
+{% if movie %}
 <section class="reviews-section" id="reviews">
     <h2>Ratings &amp; Reviews</h2>
 
@@ -256,7 +219,7 @@
 
             <form
                 method="POST"
-                action="{{ url_for('save_review', movie_id=movie.id) }}"
+                action="{{ url_for('save_review', movie_id=movie.id, media_type='movie') }}"
                 class="review-form"
             >
                 <label for="rating">Your Rating</label>
@@ -298,7 +261,7 @@
             {% if user_review %}
                 <form
                     method="POST"
-                    action="{{ url_for('delete_review', movie_id=movie.id) }}"
+                    action="{{ url_for('delete_review', movie_id=movie.id, media_type='movie') }}"
                     class="delete-review-form"
                     onsubmit="return confirm('Delete your review?');"
                 >
@@ -354,6 +317,7 @@
         {% endif %}
     </div>
 </section>
+{% endif %}
 
 
 <footer>
