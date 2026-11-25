@@ -33,6 +33,7 @@ MovieMagic/
 ├── templates/          # HTML templates
 ├── static/             # CSS, JavaScript, and static assets
 ├── tests/              # pytest suite (TMDb is faked, no network needed)
+├── docs/               # Write-ups of each team member's changes
 ├── DEPLOY.md           # PythonAnywhere deployment guide
 ├── .env                # Local environment configuration (not committed)
 ├── .env.example        # Template for .env

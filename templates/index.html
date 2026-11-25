@@ -26,68 +26,80 @@
         </p>
 
         <form class="search-form" method="POST" action="/">
-            <select
-                name="media"
-                aria-label="Search movies or TV shows"
-                onchange="this.form.submit()"
-            >
-                <option value="movie"
-                    {% if media == "movie" %}selected{% endif %}>
-                    Movies
-                </option>
-                <option value="tv"
-                    {% if media == "tv" %}selected{% endif %}>
-                    TV Shows
-                </option>
-            </select>
+            <div class="search-main">
+                <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
 
-            <input
-                type="text"
-                name="query"
-                placeholder="Search {{ 'TV show' if media == 'tv' else 'movie' }} titles..."
-                value="{{ query }}"
-                aria-label="Search titles"
-            >
-
-            <select name="genre" aria-label="Filter by genre">
-                <option value="">All Genres</option>
-                {% for genre_id, genre_name in genres.items() %}
-                <option
-                    value="{{ genre_id }}"
-                    {% if genre|string == genre_id|string %}selected{% endif %}
+                <input
+                    type="search"
+                    name="query"
+                    placeholder="Search {{ 'TV show' if media == 'tv' else 'movie' }} titles..."
+                    value="{{ query }}"
+                    aria-label="Search titles"
                 >
-                    {{ genre_name }}
-                </option>
-                {% endfor %}
-            </select>
 
-            <input
-                type="number"
-                name="year"
-                inputmode="numeric"
-                min="{{ min_year }}"
-                max="{{ max_year }}"
-                placeholder="Any year"
-                value="{{ year }}"
-                aria-label="Filter by {{ 'first air year' if media == 'tv' else 'release year' }}"
-            >
+                <button type="submit">Search</button>
+            </div>
 
-            <select name="sort_by" aria-label="Sort results">
-                <option value="popularity.desc"
-                    {% if sort_by == "popularity.desc" %}selected{% endif %}>
-                    Popularity
-                </option>
-                <option value="vote_average.desc"
-                    {% if sort_by == "vote_average.desc" %}selected{% endif %}>
-                    Highest Rating
-                </option>
-                <option value="primary_release_date.desc"
-                    {% if sort_by == "primary_release_date.desc" %}selected{% endif %}>
-                    Newest Year
-                </option>
-            </select>
+            <div class="search-filters">
+                <select
+                    name="media"
+                    aria-label="Search movies or TV shows"
+                    onchange="this.form.submit()"
+                >
+                    <option value="movie"
+                        {% if media == "movie" %}selected{% endif %}>
+                        Movies
+                    </option>
+                    <option value="tv"
+                        {% if media == "tv" %}selected{% endif %}>
+                        TV Shows
+                    </option>
+                </select>
 
-            <button type="submit">Apply</button>
+                <select name="genre" aria-label="Filter by genre"
+                    onchange="this.form.submit()">
+                    <option value="">All Genres</option>
+                    {% for genre_id, genre_name in genres.items() %}
+                    <option
+                        value="{{ genre_id }}"
+                        {% if genre|string == genre_id|string %}selected{% endif %}
+                    >
+                        {{ genre_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <input
+                    type="number"
+                    name="year"
+                    inputmode="numeric"
+                    min="{{ min_year }}"
+                    max="{{ max_year }}"
+                    placeholder="Any year"
+                    onchange="this.form.submit()"
+                    value="{{ year }}"
+                    aria-label="Filter by {{ 'first air year' if media == 'tv' else 'release year' }}"
+                >
+
+                <select name="sort_by" aria-label="Sort results"
+                    onchange="this.form.submit()">
+                    <option value="popularity.desc"
+                        {% if sort_by == "popularity.desc" %}selected{% endif %}>
+                        Popularity
+                    </option>
+                    <option value="vote_average.desc"
+                        {% if sort_by == "vote_average.desc" %}selected{% endif %}>
+                        Highest Rating
+                    </option>
+                    <option value="primary_release_date.desc"
+                        {% if sort_by == "primary_release_date.desc" %}selected{% endif %}>
+                        Newest Year
+                    </option>
+                </select>
+            </div>
         </form>
     </section>
 
