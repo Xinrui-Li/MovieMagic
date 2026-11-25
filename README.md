@@ -32,7 +32,11 @@ MovieMagic/
 ├── app.py              # Flask application and routes
 ├── templates/          # HTML templates
 ├── static/             # CSS, JavaScript, and static assets
-├── .env                # Local environment configuration
+├── tests/              # pytest suite (TMDb is faked, no network needed)
+├── docs/               # Write-ups of each team member's changes
+├── DEPLOY.md           # PythonAnywhere deployment guide
+├── .env                # Local environment configuration (not committed)
+├── .env.example        # Template for .env
 ├── .gitignore          # Files excluded from Git
 ├── requirements.txt    # Python packages
 └── movies.db           # Local SQLite database, if generated
@@ -71,7 +75,7 @@ pip install -r requirements.txt
 
 ### 4. Create a `.env` file
 
-Create a file named `.env` in the project folder:
+Copy `.env.example` to `.env` in the project folder and fill it in:
 
 ```text
 SECRET_KEY=any-long-random-string
@@ -93,6 +97,20 @@ flask --app app run --port 5001
 Open http://127.0.0.1:5001 in your browser.
 
 Port 5001 is used because macOS AirPlay often takes port 5000.
+
+### 6. Run the tests
+
+```bash
+pip install pytest
+pytest tests -q
+```
+
+The tests use a temporary database and a fake TMDb, so they need no API
+key or internet connection and never touch `movies.db`.
+
+### Deployment
+
+See [DEPLOY.md](DEPLOY.md) for hosting the app on PythonAnywhere.
 
 ## Usage
 

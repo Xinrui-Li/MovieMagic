@@ -164,52 +164,6 @@ nav a:hover {
     color: var(--muted);
 }
 
-.search-form {
-    display: flex;
-    max-width: 560px;
-    margin: 0 auto;
-    padding: 6px;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-}
-
-.search-form input {
-    flex: 1;
-    min-width: 0;
-    padding: 12px 14px;
-    color: var(--text);
-    background: transparent;
-    border: none;
-    outline: none;
-    font: inherit;
-}
-
-.search-form input::placeholder {
-    color: #777583;
-}
-
-.search-form:focus-within {
-    border-color: var(--accent);
-}
-
-.search-form button {
-    padding: 12px 23px;
-    color: #17121f;
-    background: var(--accent);
-    border: none;
-    border-radius: 8px;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.search-form button:hover {
-    background: var(--accent-hover);
-}
-
 .movie-section {
     max-width: 1200px;
     margin: 0 auto;
@@ -428,40 +382,6 @@ footer p {
 
     .section-heading h2 {
         font-size: 1.6rem;
-    }
-
-    .search-form button {
-        padding: 10px 14px;
-    }
-}
-
-.search-form select {
-    min-width: 145px;
-    max-width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #555;
-    border-radius: 8px;
-    background-color: #252525;
-    color: #ffffff;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.search-form select:focus,
-.search-form input:focus {
-    outline: 2px solid #a78bfa;
-    outline-offset: 2px;
-}
-
-.search-form select option {
-    background-color: #252525;
-    color: #ffffff;
-}
-
-@media (max-width: 600px) {
-    .search-form select {
-        width: 100%;
-        min-width: 0;
     }
 }
 
@@ -1518,26 +1438,6 @@ nav a:hover {
     display: block;
     margin-top: 10px;
 }
-/* Movies / TV search toggle */
-
-.search-form {
-    max-width: 760px;
-}
-
-.search-form select[name="media"] {
-    min-width: 110px;
-}
-
-@media (max-width: 600px) {
-    .search-form {
-        flex-wrap: wrap;
-    }
-
-    .search-form input {
-        flex-basis: 100%;
-    }
-}
-
 /* Trending, popular, and upcoming rows on the home page */
 
 .home-rows {
@@ -1720,23 +1620,6 @@ nav a:hover {
     }
 }
 
-/* Year filter in the search bar */
-
-.search-form input[name="year"] {
-    flex: 0 0 110px;
-    border: 1px solid #555;
-    border-radius: 8px;
-    background-color: #252525;
-    color: #ffffff;
-    font-size: 14px;
-}
-
-@media (max-width: 600px) {
-    .search-form input[name="year"] {
-        flex-basis: 100%;
-    }
-}
-
 /* Flash messages shown under the navbar */
 
 .flash-messages {
@@ -1762,5 +1645,148 @@ nav a:hover {
 @media (max-width: 760px) {
     .flash-messages {
         padding: 0 18px;
+    }
+}
+
+/* Search bar: one large title box, with small filter pills below it */
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.search-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 6px 6px 18px;
+    background: var(--surface-light);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: text;
+}
+
+.search-main:hover {
+    border-color: var(--muted);
+}
+
+.search-main:focus-within {
+    border-color: var(--accent);
+    box-shadow:
+        0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent),
+        0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.search-icon {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    transition: stroke 0.2s;
+}
+
+.search-main:focus-within .search-icon {
+    stroke: var(--accent);
+}
+
+.search-main input {
+    flex: 1;
+    min-width: 0;
+    padding: 14px 4px;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+    font: inherit;
+    font-size: 1.15rem;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.search-main input::placeholder {
+    color: var(--muted);
+}
+
+.search-main button {
+    flex: none;
+    padding: 14px 28px;
+    color: #17121f;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.search-main button:hover {
+    background: var(--accent-hover);
+}
+
+.search-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.search-filters select,
+.search-filters input {
+    padding: 7px 14px;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.search-filters input[name="year"] {
+    width: 100px;
+    cursor: text;
+}
+
+.search-filters input::placeholder {
+    color: var(--muted);
+}
+
+.search-filters select:hover,
+.search-filters input:hover {
+    border-color: var(--accent);
+}
+
+.search-filters select:focus-visible,
+.search-filters input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.search-filters select option {
+    color: var(--text);
+    background-color: var(--surface);
+}
+
+@media (max-width: 600px) {
+    .search-main {
+        padding-left: 14px;
+    }
+
+    .search-main input {
+        font-size: 1rem;
+    }
+
+    .search-main button {
+        padding: 12px 16px;
     }
 }
